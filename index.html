@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тебе эмоция 💌</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.8s;
+        }
+
+        .screen.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .password-screen { text-align: center; color: white; }
+
+        .password-screen h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .password-screen .question {
+            font-style: italic;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #ff6b9d;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255,107,157,0.4);
+        }
+
+        .envelope-container { text-align: center; color: white; }
+
+        .envelope {
+            width: 280px;
+            height: 180px;
+            background: #f4e4c1;
+            margin: 30px auto;
+            position: relative;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .envelope:hover { transform: translateY(-5px); }
+
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 140px solid transparent;
+            border-right: 140px solid transparent;
+            border-top: 90px solid #e8d4b0;
+            transform-origin: top;
+            transition: all 0.5s;
+            z-index: 2;
+        }
+
+        .envelope.open::before { transform: rotateX(180deg); }
+
+        .envelope-seal {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px; height: 50px;
+            background: #ff6b9d;
+            border-radius: 50%;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .envelope-name {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: #764ba2;
+            z-index: 1;
+        }
+
+        .open-text {
+            margin-top: 20px;
+            font-size: 18px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .letter {
+            background: #fffef0;
+            padding: 30px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            color: #333;
+            line-height: 1.8;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .letter-header {
+            color: #ff6b9d;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .letter-text {
+            font-size: 15px;
+            text-align: justify;
+        }
+
+        .letter-photo-container {
+            margin: 25px 0;
+            text-align: center;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transform: rotate(-1deg);
+        }
+
+        .letter-photo {
+            width: 100%;
+            max-height: 350px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .photo-caption {
+            margin-top: 10px;
+            font-style: italic;
+            color: #764ba2;
+            font-size: 14px;
+        }
+
+        .hearts {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            animation: float 10s infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts" id="hearts"></div>
+
+    <div class="container">
+        <!-- Экран 1: Пароль -->
+        <div class="screen password-screen active" id="screen1">
+            <h1>Эта эмоция закрыта словом</h1>
+            <p class="question">где мы познакомились?</p>
+            <input type="text" class="password-input" id="passwordInput" placeholder="введите слово">
+            <button class="btn" onclick="checkPassword()">Открыть</button>
+            <p id="errorMsg" style="color: #ffcccc; margin-top: 10px; display: none;">Неверный пароль 😔</p>
+        </div>
+
+        <!-- Экран 2: Конверт -->
+        <div class="screen envelope-container" id="screen2">
+            <h2 style="color: white; margin-bottom: 10px;">Алина,</h2>
+            <p style="color: white; margin-bottom: 30px;">тебе письмо</p>
+            
+            <div class="envelope" id="envelope" onclick="openEnvelope()">
+                <div class="envelope-seal">💌</div>
+                <div class="envelope-name">Алина</div>
+            </div>
+            
+            <p class="open-text">открой, это тебе</p>
+        </div>
+
+        <!-- Экран 3: Письмо -->
+        <div class="screen" id="screen3">
+            <div class="letter">
+                <div class="letter-header">это тебе, Алина</div>
+                <div class="letter-text">
+                    Алина, дорогая моя, любимая девочка, я очень сильно люблю тебя! Ты самая лучшая на свете, ты моё всё: моё настроение и моё счастье. Ты моя киса. Без тебя моя жизнь превратится в ад и сущую пустоту, поэтому я надеюсь, что мы останемся вместе навсегда. Ведь я полюбил тебя так, как никогда в жизни никого не любил. Ты самый дорогой мне человек. Я очень хочу вскоре увидеть нас у свадебного алтаря и мечтаю, чтобы мы жили вместе. Хочу, чтобы всё было так, как мы захотим, и я буду очень стараться ради этого.<br><br>
+                    Да, я не идеальный парень. Да, я, бывает, туплю, бешу тебя, ругаюсь или злюсь, но это совсем не со зла. Я просто безумно люблю тебя. Прости, если где-то обидел, задел или расстроил — я просто очень переживаю за тебя.<br><br>
+                    Спасибо тебе, моя маленькая, за то, что ты у меня есть. Ты наполнила мою жизнь красками и радостью. Раньше у меня на душе была пустота, но сейчас я по-настоящему рад и счастлив. Хочу повторить ещё раз: я очень сильно люблю тебя, моя маленькая киса!
+                </div>
+
+                <!-- Фото -->
+                <div class="letter-photo-container">
+                    <img src="https://lfdrive.ru/f/xeebXpnV.jpg" alt="Наше фото" class="letter-photo">
+                    <div class="photo-caption">моя киса)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PASSWORD = 'тикток';
+
+        function createHearts() {
+            const container = document.getElementById('hearts');
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = ['💕', '💖', '💗', '💝', '💘'][Math.floor(Math.random() * 5)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 10 + 's';
+                heart.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(heart);
+            }
+        }
+
+        function showScreen(num) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen' + num).classList.add('active');
+        }
+
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value.toLowerCase().trim();
+            if (input === PASSWORD) {
+                showScreen(2);
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('errorMsg').style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        function openEnvelope() {
+            document.getElementById('envelope').classList.add('open');
+            setTimeout(() => showScreen(3), 600);
+        }
+
+        window.onload = function() {
+            createHearts();
+            document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') checkPassword();
+            });
+        };
+    </script>
+</body>
+</html>
